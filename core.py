@@ -1,4 +1,5 @@
 from random import randrange
+from operator import attrgetter
 
 class Color(object):
 	def __init__(self,full_name):
@@ -9,6 +10,15 @@ class Color(object):
 		return self.display_name
 
 class Game(object):
+	ASSASSIN=1
+	THIEF=2
+	MAGICIAN=3
+	KING=4
+	BISHOP=5
+	MERCHANT=6
+	ARCHITECT=7
+	WARLORD=8
+
 	RED=Color("Red")
 	BLUE=Color("Blue")
 	PURPLE=Color("Purple")
@@ -30,6 +40,7 @@ class Game(object):
 		self.district_deck=[]
 		self.character_deck=[]
 		self.character_discard=[]
+		self.PERM_TURN_ORDER=[]
 
 		self.add_standard_district_cards()
 
@@ -43,6 +54,22 @@ class Game(object):
 		for a_player in self.players:
 			a_player.bank_gives(2)
 			self.draw_district_cards(a_player,4)
+
+	#this only happens once when character cards are originally chosen
+	def calc_perm_turn_order(self):
+		self.PERM_TURN_ORDER=sorted(self.character_deck,key=attrgetter("key"))
+
+	def get_player_with_character(self,character):
+		for a_player in self.players:
+			if character in a_player.character_hand:
+				return a_player
+		return None
+
+	def set_new_king(self):
+		for a_player in self.players:
+			for character in a_player.character_hand:
+				if character==Game.KING:
+					set_player_as_king(a_player.name)
 
 	def set_player_as_king(self,player_name):
 		for a_player in self.players:
@@ -87,10 +114,22 @@ class Game(object):
 		self.character_deck.append(CharacterCard("Architect",7,Game.WHITE))
 		self.character_deck.append(CharacterCard("Warlord",8,Game.RED))
 
+	def collect_all_characters(self):
+		temp_characters=[]
+		for a_player in self.players:
+			temp_characters+=a_player.character_played
+			a_player.character_played=[]
+		temp_characters+=self.character_discard
+		self.character_discard=[]
+		self.character_deck=temp_characters
 
 	def draw_district_cards(self,player,num):
+		to_return=[]
 		for i in range(num):
-			player.get_district_card(self.district_deck.pop(0))
+			card=self.district_deck.pop(0)
+			player.get_district_card(card)
+			to_return.append(card)
+		return to_return
 
 	def draw_character_card(self,player):
 			player.get_character_card(self.character_deck.pop(0))
@@ -145,6 +184,9 @@ class Player(object):
 	def get_district_card(self,card):
 		self.district_hand.append(card)
 
+	def discard_district_card(self,card):
+		self.district_hand.remove(card)
+
 	def get_character_card(self,card):
 		self.character_hand.append(card)
 
@@ -160,7 +202,7 @@ class Player(object):
 		self.is_king=False
 
 	def __str__(self):
-		return "<"+self.name+"  DHand: ["+str(len(self.district_hand))+"] CHand: "+str(self.character_hand)+" "+str(self.gold)+">"
+		return "<"+self.name+"  DHand: ["+str(len(self.district_hand))+"] CHand: "+str(self.character_hand)+" "+str(self.gold)+">\n "+str(self.district_played)
 
 class DistrictCard(object):
 	def __init__(self,name,cost,color):
