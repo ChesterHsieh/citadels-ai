@@ -73,10 +73,10 @@ class CompBrain(Brain):
 		for district in choices:
 			if district.cost>self.player.gold+3:
 				to_discard=district
-				to_keep.remove(district)
 				break
 		if to_discard==None:
-			to_discard=to_keep.pop()
+			to_discard=to_keep[0]
+		return to_discard
 
 	def choose_build(self):
 		for district in self.player.district_hand:
