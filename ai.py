@@ -13,6 +13,18 @@ class Brain(object):
 		self.player.get_character_card(character)
 		self.game.character_deck.remove(character)
 
+	def meta_choose_to_play_special(self,current_character,has_played_special):
+		if self.choose_to_play_special(current_character) and not(has_played_special):
+			return self.choose_special_target(current_character)
+
+	@abstractmethod
+	def choose_to_play_special(self,current_character):
+		raise NotImplementedError
+
+	@abstractmethod
+	def choose_special_target(self):
+		raise NotImplementedError
+
 	@abstractmethod
 	#true for coin false for card
 	def choose_card_or_coin(self,current_character):
@@ -31,6 +43,19 @@ class Brain(object):
 		raise NotImplementedError
 
 class CompBrain(Brain):
+
+	def choose_special_target(self,current_character):
+		#You are a potential target if you haven't already gone and if the person doing the targeting doesn't hold that card.
+		potential_target_finder=lambda a_character:(a_character.key>current_character.key) and (not(a_character in player.character_hand))  
+		targets=list(filter(potential_target_finder, self.game.PERM_TURN_ORDER))
+		if targets==[]:
+			return None
+		else:
+			return random.choice(targets)
+
+	def choose_to_play_special(self,current_character):
+		if current_character.key==Game.ASSASSIN:
+			return True
 
 	def choose_character(self,character_deck):
 		return random.choice(character_deck)
@@ -63,7 +88,6 @@ def connect_ai_with_players(game):
 	for comp_player in game.computer_players:
 		CompBrain(game,comp_player)
 
-
 if __name__ == "__main__":
 	#deform to form a star
 	the_game=Game(3,0,False)
@@ -92,10 +116,18 @@ if __name__ == "__main__":
 		#evaluate player order
 		for character in the_game.PERM_TURN_ORDER:
 			current_player=the_game.get_player_with_character(character)
+			has_played_special=False
 			if current_player==None:
 				continue
-			#Player turn here:
-			print(str(current_player)+" as "+str(character))
+
+			#------Player turn here--------:
+			#Possible special subphase
+			possible_chosen_character=current_player.brain.meta_choose_to_play_special(character,has_played_special)
+			if possible_chosen_character!=None:
+				print(" Targeted "+str(possible_chosen_character))
+				has_played_special=True
+
+			print(" "+str(current_player)+" as "+str(character))
 			if current_player.brain.choose_card_or_coin(character):
 				current_player.bank_gives(2)
 				print(" Took coins")
@@ -105,11 +137,26 @@ if __name__ == "__main__":
 				current_player.discard_district_card(discarded)
 				print(" Drew "+str(drawn)+", discarded "+str(discarded))
 
+			#Possible special subphase
+			possible_chosen_character=current_player.brain.meta_choose_to_play_special(character,has_played_special)
+			if possible_chosen_character!=None:
+				print(" Targeted "+str(possible_chosen_character))
+				has_played_special=True
+
 			#Build Phase
 			to_build=current_player.brain.choose_build()
 			if to_build!=None:
 				current_player.build_district(to_build)
 				print(" Built "+str(to_build))
+
+			#Possible special subphase
+			possible_chosen_character=current_player.brain.meta_choose_to_play_special(character,has_played_special)
+			if possible_chosen_character!=None:
+				print(" Targeted "+str(possible_chosen_character))
+				has_played_special=True
+			elif not(has_played_special):
+				print(" Chose to not use special")
+
 
 			#TODO: technically the character is played at the beginning of the turn, but we look at character in hand for stuff so can't do that yet
 			current_player.play_character(character)

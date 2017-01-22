@@ -202,7 +202,7 @@ class Player(object):
 		self.is_king=False
 
 	def __str__(self):
-		return "<"+self.name+"  DHand: ["+str(len(self.district_hand))+"] CHand: "+str(self.character_hand)+" "+str(self.gold)+">\n "+str(self.district_played)
+		return "<"+self.name+"  DHand: ["+str(len(self.district_hand))+"] CHand: "+str(self.character_hand)+" "+str(self.gold)+" "+str(self.district_played)+">"
 
 class DistrictCard(object):
 	def __init__(self,name,cost,color):
@@ -227,4 +227,3 @@ class CharacterCard(object):
 
 	def __str__(self):
 		return self.name
-	
