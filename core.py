@@ -105,14 +105,14 @@ class Game(object):
 				self.district_deck.append(constructed_card)
 
 	def add_standard_character_cards(self):
-		self.character_deck.append(CharacterCard("Assassin",1,Game.WHITE))
-		self.character_deck.append(CharacterCard("Thief",2,Game.WHITE))
-		self.character_deck.append(CharacterCard("Magician",3,Game.WHITE))
-		self.character_deck.append(CharacterCard("King",4,Game.YELLOW))
-		self.character_deck.append(CharacterCard("Bishop",5,Game.BLUE))
-		self.character_deck.append(CharacterCard("Merchant",6,Game.GREEN))
-		self.character_deck.append(CharacterCard("Architect",7,Game.WHITE))
-		self.character_deck.append(CharacterCard("Warlord",8,Game.RED))
+		self.character_deck.append(CharacterCard("Assassin",1,Game.WHITE,True))
+		self.character_deck.append(CharacterCard("Thief",2,Game.WHITE,True))
+		self.character_deck.append(CharacterCard("Magician",3,Game.WHITE,True))
+		self.character_deck.append(CharacterCard("King",4,Game.YELLOW,False))
+		self.character_deck.append(CharacterCard("Bishop",5,Game.BLUE,False))
+		self.character_deck.append(CharacterCard("Merchant",6,Game.GREEN,False))
+		self.character_deck.append(CharacterCard("Architect",7,Game.WHITE,False))
+		self.character_deck.append(CharacterCard("Warlord",8,Game.RED,False))
 
 	def collect_all_characters(self):
 		temp_characters=[]
@@ -217,11 +217,22 @@ class DistrictCard(object):
 		return self.__str__()
 
 class CharacterCard(object):
-	def __init__(self,name,key,color):
+	def __init__(self,name,key,color,targeting_special):
 		self.name=name
 		self.key=key
 		self.color=color
+		self.targeting_special=targeting_special
 	
+	def special_can_target(self):
+		return self.targeting_special
+
+	def execute_special(self):
+		print(" Executed Special")
+
+	def execute_special(self,target_character):
+		print(" Targeted "+str(target_character))
+
+
 	def __repr__(self):
 		return self.__str__()
 

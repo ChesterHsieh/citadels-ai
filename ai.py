@@ -15,7 +15,18 @@ class Brain(object):
 
 	def meta_choose_to_play_special(self,current_character,has_played_special):
 		if self.choose_to_play_special(current_character) and not(has_played_special):
-			return self.choose_special_target(current_character)
+			if current_character.special_can_target():
+				possible_target=self.choose_special_target(current_character)
+				if possible_target!=None:
+					current_character.execute_special(possible_target)
+				else:
+					print(" No Valid Targets")
+					return False
+			else:
+				current_character.execute_special()
+			return True
+		else:
+			return False
 
 	@abstractmethod
 	def choose_to_play_special(self,current_character):
@@ -121,13 +132,11 @@ if __name__ == "__main__":
 				continue
 
 			#------Player turn here--------:
-			#Possible special subphase
-			possible_chosen_character=current_player.brain.meta_choose_to_play_special(character,has_played_special)
-			if possible_chosen_character!=None:
-				print(" Targeted "+str(possible_chosen_character))
-				has_played_special=True
-
 			print(" "+str(current_player)+" as "+str(character))
+
+			#Possible special subphase
+			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special)
+			
 			if current_player.brain.choose_card_or_coin(character):
 				current_player.bank_gives(2)
 				print(" Took coins")
@@ -138,10 +147,7 @@ if __name__ == "__main__":
 				print(" Drew "+str(drawn)+", discarded "+str(discarded))
 
 			#Possible special subphase
-			possible_chosen_character=current_player.brain.meta_choose_to_play_special(character,has_played_special)
-			if possible_chosen_character!=None:
-				print(" Targeted "+str(possible_chosen_character))
-				has_played_special=True
+			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special)
 
 			#Build Phase
 			to_build=current_player.brain.choose_build()
@@ -150,11 +156,8 @@ if __name__ == "__main__":
 				print(" Built "+str(to_build))
 
 			#Possible special subphase
-			possible_chosen_character=current_player.brain.meta_choose_to_play_special(character,has_played_special)
-			if possible_chosen_character!=None:
-				print(" Targeted "+str(possible_chosen_character))
-				has_played_special=True
-			elif not(has_played_special):
+			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special)
+			if not(has_played_special):
 				print(" Chose to not use special")
 
 
