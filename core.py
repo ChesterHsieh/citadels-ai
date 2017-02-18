@@ -112,7 +112,7 @@ class Game(object):
 		self.character_deck.append(CharacterCard("Bishop",5,Game.BLUE,False))
 		self.character_deck.append(CharacterCard("Merchant",6,Game.GREEN,False))
 		self.character_deck.append(CharacterCard("Architect",7,Game.WHITE,False))
-		self.character_deck.append(CharacterCard("Warlord",8,Game.RED,False))
+		self.character_deck.append(CharacterCard("Warlord",8,Game.RED,True))
 
 	def collect_all_characters(self):
 		temp_characters=[]
@@ -226,12 +226,17 @@ class CharacterCard(object):
 	def special_can_target(self):
 		return self.targeting_special
 
-	def execute_special(self):
+	def execute_nontarget_special(self):
 		print(" Executed Special")
 
-	def execute_special(self,target_character):
+	def execute_target_special(self,target_character):
 		print(" Targeted "+str(target_character))
 
+	def execute_special(self,target_character=None):
+		if target_character==None:
+			self.execute_nontarget_special()
+		else:
+			self.execute_target_special(target_character)
 
 	def __repr__(self):
 		return self.__str__()

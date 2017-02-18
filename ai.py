@@ -13,8 +13,8 @@ class Brain(object):
 		self.player.get_character_card(character)
 		self.game.character_deck.remove(character)
 
-	def meta_choose_to_play_special(self,current_character,has_played_special):
-		if self.choose_to_play_special(current_character) and not(has_played_special):
+	def meta_choose_to_play_special(self,current_character,has_played_special,slot):
+		if self.choose_to_play_special(current_character,slot) and not(has_played_special):
 			if current_character.special_can_target():
 				possible_target=self.choose_special_target(current_character)
 				if possible_target!=None:
@@ -29,7 +29,7 @@ class Brain(object):
 			return False
 
 	@abstractmethod
-	def choose_to_play_special(self,current_character):
+	def choose_to_play_special(self,current_character,slot):
 		raise NotImplementedError
 
 	@abstractmethod
@@ -64,9 +64,16 @@ class CompBrain(Brain):
 		else:
 			return random.choice(targets)
 
-	def choose_to_play_special(self,current_character):
-		if current_character.key==Game.ASSASSIN:
+	def choose_to_play_special(self,current_character,slot):
+		if current_character.key==Game.MAGICIAN:
+			return False
+		else:
 			return True
+		# if current_character.key==Game.ASSASSIN:
+		# 	return True
+		# elif current_character.key=Game.THEIF:
+		# 	return True
+		# elif current_character.key=Game.
 
 	def choose_character(self,character_deck):
 		return random.choice(character_deck)
@@ -135,7 +142,7 @@ if __name__ == "__main__":
 			print(" "+str(current_player)+" as "+str(character))
 
 			#Possible special subphase
-			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special)
+			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special,0)
 			
 			if current_player.brain.choose_card_or_coin(character):
 				current_player.bank_gives(2)
@@ -147,7 +154,7 @@ if __name__ == "__main__":
 				print(" Drew "+str(drawn)+", discarded "+str(discarded))
 
 			#Possible special subphase
-			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special)
+			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special,1)
 
 			#Build Phase
 			to_build=current_player.brain.choose_build()
@@ -156,7 +163,7 @@ if __name__ == "__main__":
 				print(" Built "+str(to_build))
 
 			#Possible special subphase
-			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special)
+			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special,2)
 			if not(has_played_special):
 				print(" Chose to not use special")
 
@@ -172,4 +179,6 @@ if __name__ == "__main__":
 		the_game.collect_all_characters()
 
 		print(the_game)
-		input()
+		player_in=input()
+		if player_in=="q":
+			exit(0)
