@@ -105,8 +105,8 @@ class Game(object):
 				self.district_deck.append(constructed_card)
 
 	def add_standard_character_cards(self):
-		self.character_deck.append(CharacterCard("Assassin",1,Game.WHITE,True))
-		self.character_deck.append(CharacterCard("Thief",2,Game.WHITE,True))
+		self.character_deck.append(Assassin("Assassin",1,Game.WHITE,True))
+		self.character_deck.append(Theif("Thief",2,Game.WHITE,True))
 		self.character_deck.append(CharacterCard("Magician",3,Game.WHITE,True))
 		self.character_deck.append(CharacterCard("King",4,Game.YELLOW,False))
 		self.character_deck.append(CharacterCard("Bishop",5,Game.BLUE,False))
@@ -172,6 +172,12 @@ class Player(object):
 		else:
 			self.gold-=amount
 
+	def transfer_gold_to(self,other_player,amount=float("inf")):
+		amount_to_transfer=min(amount,self.gold)
+		self.gold-=amount_to_transfer
+		other_player.gold+=amount_to_transfer
+		return amount_to_transfer
+
 	def build_district(self,card):
 		self.bank_takes(card.cost)
 		self.district_hand.remove(card)
@@ -201,8 +207,11 @@ class Player(object):
 	def set_as_not_king(self):
 		self.is_king=False
 
-	def __str__(self):
+	def long_desc(self):
 		return "<"+self.name+"  DHand: ["+str(len(self.district_hand))+"] CHand: "+str(self.character_hand)+" "+str(self.gold)+" "+str(self.district_played)+">"
+
+	def __str__(self):
+		return self.name
 
 class DistrictCard(object):
 	def __init__(self,name,cost,color):
@@ -222,6 +231,8 @@ class CharacterCard(object):
 		self.key=key
 		self.color=color
 		self.targeting_special=targeting_special
+		self.is_dead=False
+		self.stolen_by=None
 	
 	def special_can_target(self):
 		return self.targeting_special
@@ -229,17 +240,27 @@ class CharacterCard(object):
 	def execute_nontarget_special(self):
 		print(" Executed Special")
 
-	def execute_target_special(self,target_character):
-		print(" Targeted "+str(target_character))
+	def execute_target_special(self,target_character,player):
+		print(" "+str(player)+" Targeted "+str(target_character))
 
-	def execute_special(self,target_character=None):
+	def execute_special(self,target_character=None,player=None):
 		if target_character==None:
 			self.execute_nontarget_special()
 		else:
-			self.execute_target_special(target_character)
+			self.execute_target_special(target_character,player)
 
 	def __repr__(self):
 		return self.__str__()
 
 	def __str__(self):
 		return self.name
+
+class Assassin (CharacterCard):
+	def execute_target_special(self,target_character,player):
+		target_character.is_dead=True
+		print(" "+str(player)+" targeted "+str(target_character)+" to be assassinated")
+
+class Theif (CharacterCard):
+	def execute_target_special(self,target_character,player):
+		target_character.stolen_by=player
+		print(" "+str(player)+" targeted "+str(target_character)+" to steal from")

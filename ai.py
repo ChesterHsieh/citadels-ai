@@ -18,7 +18,7 @@ class Brain(object):
 			if current_character.special_can_target():
 				possible_target=self.choose_special_target(current_character)
 				if possible_target!=None:
-					current_character.execute_special(possible_target)
+					current_character.execute_special(possible_target,self.player)
 				else:
 					print(" No Valid Targets")
 					return False
@@ -136,14 +136,31 @@ if __name__ == "__main__":
 			current_player=the_game.get_player_with_character(character)
 			has_played_special=False
 			if current_player==None:
+				#reset if no one has picked this card
+				character.is_dead=False
+				character.stolen_by=None
 				continue
 
 			#------Player turn here--------:
-			print(" "+str(current_player)+" as "+str(character))
+			print(current_player.long_desc()+" as "+str(character))
+
+			if character.is_dead:
+				print(" "+str(character)+" was skipped since it was killed by the assassin")
+				character.is_dead=False
+				current_player.play_character(character)
+				continue
+
+			if character.stolen_by!=None:
+				amount_transfered=current_player.transfer_gold_to(character.stolen_by)
+				print(str(character)+" has "+str(amount_transfered)+" gold stolen from them by "+str(character.stolen_by))
+				character.stolen_by=None
 
 			#Possible special subphase
 			has_played_special= has_played_special or current_player.brain.meta_choose_to_play_special(character,has_played_special,0)
 			
+			if current_player.brain.player!=current_player:
+				print("ERROR!")
+
 			if current_player.brain.choose_card_or_coin(character):
 				current_player.bank_gives(2)
 				print(" Took coins")
