@@ -67,6 +67,9 @@ class CompBrain(Brain):
 	def choose_to_play_special(self,current_character,slot):
 		if current_character.key==Game.MAGICIAN:
 			return False
+			# my_num_cards=len(self.player.district_hand)
+			# if my_num_cards<2:
+			# 	return True
 		else:
 			return True
 		# if current_character.key==Game.ASSASSIN:

@@ -131,6 +131,12 @@ class Game(object):
 			to_return.append(card)
 		return to_return
 
+	def who_has_the_most_cards(self):
+		all_players=self.players
+		most_cards=sorted(all_players,key=lambda p:len(p.district_hand))
+		most_cards.reverse()
+		return most_cards
+
 	def draw_character_card(self,player):
 			player.get_character_card(self.character_deck.pop(0))
 
@@ -264,3 +270,6 @@ class Theif (CharacterCard):
 	def execute_target_special(self,target_character,player):
 		target_character.stolen_by=player
 		print(" "+str(player)+" targeted "+str(target_character)+" to steal from")
+
+class Magician (CharacterCard):
+	def execute_nontarget_special(self)
